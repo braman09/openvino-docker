@@ -1,0 +1,23 @@
+services:
+  - docker
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.24.1
+
+before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+
+script:
+  # Build all images
+  - docker-compose build
+  # Show image sizes
+  - docker images
+  # Show classification_sample_async dependencies
+  - docker-compose run --rm sampleapp-runtime ldd /root/inference_engine_samples_build/intel64/Release/classification_sample_async
+  # Show size of files included in /opt/intel/
+  - docker-compose run --rm sampleapp-runtime du -a /opt/intel/ | sort -nr
+  # Run classification_sample_async
+  - docker-compose run --rm sampleapp-runtime /root/run.sh
